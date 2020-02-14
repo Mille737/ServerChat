@@ -2,12 +2,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
 
-    private static final int Port = 1234;
+
     private static ServerSocket serverSocket;
+    private static final int Port = 1234;
 
     public static void main(String[] args) {
 
@@ -19,9 +21,14 @@ public class Main {
             System.out.println("unreachable port");
             System.exit(1);
         }
-        do {
-            handleClient();
-        } while (true);
+        try {
+            do {
+                handleClient();
+            } while (true);
+        }
+        catch (NoSuchElementException nseEx) {
+            nseEx.printStackTrace();
+        }
     }
 
     private static void handleClient() {
@@ -36,19 +43,23 @@ public class Main {
             PrintWriter output = new PrintWriter(link.getOutputStream(), true);
 
             int messageNum = 0;
+            String message;
             //input
-            String message = input.nextLine();
+            while (input.hasNextLine()) {
+                message = input.nextLine();
 
-            while (!message.equals("***CLOSE***")) {
-                System.out.println("Message received");
-                messageNum ++;
+
+                while (!message.equals("**CLOSE**")) {
+                    System.out.println("Message received "+ message);
+                    messageNum ++;
+                    //output
+                    output.println("Message " + messageNum + " : " + message);
+                    message = input.nextLine();
+
+                }
                 //output
-                output.println("Message " + messageNum + " : " + message);
-                input.nextLine();
-            }
-            //output
-            output.println(messageNum + " messages received.");
-        }
+                output.println(messageNum + " messages received.");
+            }}
         catch (IOException ioEx) {
             ioEx.printStackTrace();
         }
